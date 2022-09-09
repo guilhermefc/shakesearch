@@ -19,7 +19,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	fs := http.FileServer(http.Dir("./static"))
+	fs := http.FileServer(http.Dir("./shake_search_web/build/web"))
 	http.Handle("/", fs)
 
 	http.HandleFunc("/search", handleSearch(searcher))
