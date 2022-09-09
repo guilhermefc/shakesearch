@@ -36,8 +36,6 @@ func main() {
 }
 func enableCors(w *http.ResponseWriter) {
 	(*w).Header().Set("Access-Control-Allow-Origin", "*")
-	(*w).Header().Set("Access-Control-Allow-Methods", "GET, POST, OPTIONS, DELETE")
-	(*w).Header().Set("Access-Control-Allow-Headers", "origin, X-Requested-With")
 }
 
 type Searcher struct {
@@ -82,7 +80,17 @@ func (s *Searcher) Search(query string) []string {
 	idxs := s.SuffixArray.Lookup([]byte(query), -1)
 	results := []string{}
 	for _, idx := range idxs {
-		results = append(results, s.CompleteWorks[idx-250:idx+250])
+		initialCut := idx - 250
+		if initialCut < 0 {
+			initialCut = 0
+		}
+
+		endCut := idx + 250
+		if endCut > len(s.CompleteWorks) {
+			endCut = len(s.CompleteWorks) - 1
+		}
+
+		results = append(results, s.CompleteWorks[initialCut:endCut])
 	}
 	return results
 }
