@@ -36,6 +36,8 @@ func main() {
 }
 func enableCors(w *http.ResponseWriter) {
 	(*w).Header().Set("Access-Control-Allow-Origin", "*")
+	(*w).Header().Set("Access-Control-Allow-Methods", "GET, POST, OPTIONS, DELETE")
+	(*w).Header().Set("Access-Control-Allow-Headers", "origin, X-Requested-With")
 }
 
 type Searcher struct {
