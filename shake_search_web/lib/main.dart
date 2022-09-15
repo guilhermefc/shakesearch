@@ -1,14 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:shake_search/presentation/home/home_page.dart';
 
 void main() {
   runApp(const MyApp());
+  RendererBinding.instance.setSemanticsEnabled(true);
 }
 
 class MyApp extends StatelessWidget {
   const MyApp({Key? key}) : super(key: key);
 
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
