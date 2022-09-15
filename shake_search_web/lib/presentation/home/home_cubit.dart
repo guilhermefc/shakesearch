@@ -27,6 +27,7 @@ class HomeCubit extends Cubit<HomeState> {
                     text: highlightPhrase(e.text, query),
                     sceneName: e.sceneName,
                     actName: e.actName,
+                    textExtended: highlightPhrase(e.textExtended, query),
                   ),
                 ),
               ),

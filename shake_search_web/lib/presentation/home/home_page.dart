@@ -1,3 +1,4 @@
+import 'package:expandable/expandable.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shake_search/data/datasources/network_datasource.dart';
@@ -74,10 +75,16 @@ class HomeView extends StatelessWidget {
                           context,
                           searchController.text,
                         ),
+                        const SizedBox(
+                          height: 16,
+                        ),
                         buildResultsListView(
                           state,
                           searchController,
                           context,
+                        ),
+                        const SizedBox(
+                          height: 16,
                         ),
                         buildPaginationButtons(
                           state,
@@ -181,26 +188,53 @@ class HomeView extends StatelessWidget {
       itemCount: state.searchResult.searchList.length,
       itemBuilder: (context, index) {
         final phrase = state.searchResult.searchList[index];
+        final textHighlighted = highlightQueryWords(
+          phrase.text,
+          searchController.text,
+        );
+
+        final textHighlightedExtended = highlightQueryWords(
+          phrase.textExtended,
+          searchController.text,
+        );
+
+        final cardTitle = '${phrase.actName} ${phrase.sceneName}';
 
         return Card(
           child: Padding(
             padding: const EdgeInsets.all(16),
-            child: Column(
-              children: [
-                SelectableText(
-                  '${phrase.actName} ${phrase.sceneName}',
-                  style: const TextStyle(fontWeight: FontWeight.bold),
-                ),
-                SelectableText.rich(
-                  highlightQueryWords(
-                    phrase.text,
-                    searchController.text,
+            child: ExpandablePanel(
+              header: Center(
+                child: Text(
+                  cardTitle,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
                   ),
                 ),
-              ],
+              ),
+              collapsed: Text.rich(
+                textHighlighted,
+                softWrap: true,
+                maxLines: 4,
+              ),
+              expanded: Text.rich(
+                textHighlightedExtended,
+              ),
+
+              theme: const ExpandableThemeData(
+                animationDuration: Duration(milliseconds: 300),
+              ),
+
+              // hasIcon: true,
             ),
           ),
         );
+
+        // return ExpandableCard(
+        //   cardTitle: cardTitle,
+        //   text: textHighlighted,
+        //   textExtended: textHighlightedExtended,
+        // );
       },
     );
   }
@@ -255,46 +289,98 @@ class HomeView extends StatelessWidget {
     BuildContext context,
     String query,
   ) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        Visibility(
-          visible: state.searchResult.currentPage > 0,
-          child: ElevatedButton(
-            onPressed: () {
-              final page = state.searchResult.currentPage - 1;
-              context.read<HomeCubit>().onSearch(
-                    query,
-                    page: page,
-                  );
-            },
-            child: const Text('previous'),
-          ),
-        ),
-        Visibility(
-          visible: state.searchResult.totalPagesLength > 0,
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 12),
-            child: Text(
-              '${state.searchResult.currentPage + 1} of ${state.searchResult.totalPagesLength}',
+    return Visibility(
+      visible: state.searchResult.totalPagesLength > 0,
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          SizedBox(
+            width: 100,
+            child: ElevatedButton(
+              onPressed: state.searchResult.currentPage > 0
+                  ? () {
+                      final page = state.searchResult.currentPage - 1;
+                      context.read<HomeCubit>().onSearch(
+                            query,
+                            page: page,
+                          );
+                    }
+                  : null,
+              child: const Text('< previous'),
             ),
           ),
-        ),
-        Visibility(
-          visible: state.searchResult.currentPage + 1 <
-              state.searchResult.totalPagesLength,
-          child: ElevatedButton(
-            onPressed: () {
-              final page = state.searchResult.currentPage + 1;
-              context.read<HomeCubit>().onSearch(
-                    query,
-                    page: page,
-                  );
-            },
-            child: const Text('next'),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 12),
+            child: Text(
+              'Page ${state.searchResult.currentPage + 1} of ${state.searchResult.totalPagesLength}',
+            ),
           ),
+          SizedBox(
+            width: 100,
+            child: ElevatedButton(
+              onPressed: state.searchResult.currentPage + 1 <
+                      state.searchResult.totalPagesLength
+                  ? () {
+                      final page = state.searchResult.currentPage + 1;
+                      context.read<HomeCubit>().onSearch(
+                            query,
+                            page: page,
+                          );
+                    }
+                  : null,
+              child: const Text('next >'),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class ExpandableCard extends StatefulWidget {
+  const ExpandableCard({
+    Key? key,
+    required this.cardTitle,
+    required this.text,
+    required this.textExtended,
+  }) : super(key: key);
+
+  final String cardTitle;
+  final TextSpan text;
+  final TextSpan textExtended;
+
+  @override
+  State<ExpandableCard> createState() => _ExpandableCardState();
+}
+
+class _ExpandableCardState extends State<ExpandableCard> {
+  bool isCollapsed = true;
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          children: [
+            SelectableText(
+              widget.cardTitle,
+              style: const TextStyle(fontWeight: FontWeight.bold),
+            ),
+            SelectableText.rich(
+              isCollapsed ? widget.text : widget.textExtended,
+            ),
+            ElevatedButton(
+              onPressed: () {
+                setState(() {
+                  isCollapsed = !isCollapsed;
+                });
+              },
+              child: Text(isCollapsed ? 'show more' : 'show less'),
+            ),
+          ],
         ),
-      ],
+      ),
     );
   }
 }

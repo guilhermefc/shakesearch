@@ -5,6 +5,7 @@ import 'package:shake_search/domain/entities/scene_item.dart';
 class SceneItemData extends SceneItem {
   const SceneItemData({
     required super.text,
+    required super.textExtended,
     required super.sceneName,
     required super.actName,
   });
@@ -12,6 +13,7 @@ class SceneItemData extends SceneItem {
   factory SceneItemData.fromMap(Map<String, dynamic> map) {
     return SceneItemData(
       text: map['Text'] as String,
+      textExtended: map['TextExtended'] as String,
       sceneName: map['Scene'] as String,
       actName: map['Act'] as String,
     );

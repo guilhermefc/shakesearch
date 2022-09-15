@@ -16,6 +16,7 @@ class MyApp extends StatelessWidget {
       title: 'Shake Search',
       theme: ThemeData(
         primarySwatch: Colors.blue,
+        scaffoldBackgroundColor: Colors.grey[300],
       ),
       home: const Scaffold(body: SafeArea(child: HomePage())),
     );
