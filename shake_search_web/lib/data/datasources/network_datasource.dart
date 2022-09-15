@@ -7,7 +7,7 @@ class NetworkDatasource implements Datasource {
   Future<String> getSearch(String query, int page) async {
     try {
       final options = BaseOptions(
-        baseUrl: 'http://localhost:3001/',
+        baseUrl: 'https://shake-search-gui.herokuapp.com/',
       );
 
       final dio = Dio(options);
