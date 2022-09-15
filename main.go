@@ -59,7 +59,6 @@ func handleSearch(searcher Searcher) func(w http.ResponseWriter, r *http.Request
 
 		page := 1
 		if len(r.URL.Query()["page"]) == 1 {
-			var _ error
 			page, _ = strconv.Atoi(r.URL.Query()["page"][0])
 		}
 
@@ -72,10 +71,11 @@ func handleSearch(searcher Searcher) func(w http.ResponseWriter, r *http.Request
 		buf := &bytes.Buffer{}
 		enc := json.NewEncoder(buf)
 
-		var maxLength = 20 * page
-		var minLenght = maxLength - 20
+		const pageSize = 20
+		var maxLength = pageSize * page
+		var minLenght = maxLength - pageSize
 		totalItemsLength := len(results)
-		totalPagesLength := len(results) / 20
+		totalPagesLength := len(results) / pageSize
 
 		if len(results) > maxLength {
 			results = results[minLenght:maxLength]
