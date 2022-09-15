@@ -66359,7 +66359,7 @@ qH(a,b){return this.NU(a,b)},
 NU(a,b){var s=0,r=A.a_(t.N),q,p=2,o,n=[],m,l,k,j,i,h,g,f
 var $async$qH=A.a0(function(c,d){if(c===1){o=d
 s=p}while(true)switch(s){case 0:p=4
-m=A.ajv("http://localhost:3001/")
+m=A.ajv("https://shake-search-gui.herokuapp.com/")
 i=m
 h=new A.UB($,new A.G4(A.b([],t.lC),new A.wR(),new A.wR(),new A.wR()),$,new A.Ut(),!1)
 h.mN$=i==null?A.ajv(""):i
