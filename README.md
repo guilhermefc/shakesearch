@@ -1,3 +1,29 @@
+# ShakeSearch 2.1
+
+## What's New
+Hey, take a look: https://shake-search-gui.herokuapp.com/#/
+The new version includes:
+- Pagination for a better experience reading results
+- More information about the act and scene displayed on the search item
+- New expandable cards UI for a better reading
+- More text on expanded card to read
+
+## Dev decisions
+Pagination:
+- Decided to orchestrate it on backend, creating a response object that offers pagination capacity for the frontend
+- Create a few other fields in the response, to display the short and extended text for the user
+
+Scene and Act information on results:
+- It was a tricky problem, because the original text work is not formatted, it's just raw text, so to resolve this in a simpler approach I decided to search in the text for the previous word of Scene and Act and substring this texts to present to the user. It's not the most performing approach, but it supports the use case at the moment
+
+Expandable cards:
+- Decided to improve the experience of viewing the information with collapsing cards
+
+Improve accessibility:
+- I tried some tweaks to improve the accessibility, and unfortunately found an open issue on flutter github about a problem on flutter web when the user is inside a listview and tries to scroll using pageup or pagedown, https://github.com/flutter/flutter/issues/93521
+- Besides this problem, the user can use tab to pass through the content and expand cards, but right now is not the most accessible solution, I could tackle this in the next evolution.
+
+
 # ShakeSearch 2.0
 ## Whats New
 Hello, this is the new Shake Search portal: https://shake-search-gui.herokuapp.com/#/
