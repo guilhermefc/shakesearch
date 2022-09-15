@@ -7,6 +7,7 @@ import (
 	"index/suffixarray"
 	"io/ioutil"
 	"log"
+	"math"
 	"net/http"
 	"os"
 	"strconv"
@@ -49,7 +50,13 @@ type Response struct {
 	CurrentPage      int
 	TotalPagesLength int
 	TotalItemsLength int
-	Items            []string
+	Items            []Work
+}
+
+type Work struct {
+	Text  string
+	Scene string
+	Act   string
 }
 
 func handleSearch(searcher Searcher) func(w http.ResponseWriter, r *http.Request) {
@@ -57,7 +64,7 @@ func handleSearch(searcher Searcher) func(w http.ResponseWriter, r *http.Request
 		enableCors(&w)
 		query, ok := r.URL.Query()["q"]
 
-		page := 1
+		page := 0
 		if len(r.URL.Query()["page"]) == 1 {
 			page, _ = strconv.Atoi(r.URL.Query()["page"][0])
 		}
@@ -71,15 +78,21 @@ func handleSearch(searcher Searcher) func(w http.ResponseWriter, r *http.Request
 		buf := &bytes.Buffer{}
 		enc := json.NewEncoder(buf)
 
-		const pageSize = 20
-		var maxLength = pageSize * page
-		var minLenght = maxLength - pageSize
-		totalItemsLength := len(results)
-		totalPagesLength := len(results) / pageSize
+		const pageSize = 10
+		var minLenght = page * pageSize
+		var maxLength = minLenght + pageSize
 
-		if len(results) > maxLength {
-			results = results[minLenght:maxLength]
+		if minLenght > len(results) {
+			minLenght = 0
 		}
+		if maxLength > len(results) {
+			maxLength = len(results)
+		}
+
+		totalItemsLength := len(results)
+		pageSizeDivision := float64(len(results)) / float64(pageSize)
+		totalPagesLength := int(math.Ceil(float64(pageSizeDivision)))
+		results = results[minLenght:maxLength]
 
 		response := Response{
 			CurrentPage:      page,
@@ -110,9 +123,10 @@ func (s *Searcher) Load(filename string) error {
 	return nil
 }
 
-func (s *Searcher) Search(query string) []string {
+func (s *Searcher) Search(query string) []Work {
 	idxs := s.SuffixArray.Lookup([]byte(strings.ToLower(query)), -1)
-	results := []string{}
+
+	results := []Work{}
 	for _, idx := range idxs {
 		initialCut := idx - 250
 		if initialCut < 0 {
@@ -124,7 +138,45 @@ func (s *Searcher) Search(query string) []string {
 			endCut = len(s.CompleteWorks) - 1
 		}
 
-		results = append(results, s.CompleteWorks[initialCut:endCut])
+		searchScene := s.CompleteWorks[0:idx]
+		indexAct := strings.LastIndex(searchScene, "ACT")
+		indexScene := strings.LastIndex(searchScene, "SCENE")
+
+		actTitle := "Act not found"
+		if indexAct != -1 {
+			searchActEnd := s.CompleteWorks[indexAct : indexAct+200]
+			indexEndActDot := strings.Index(searchActEnd, ".")
+			indexEndActSlash := strings.Index(searchActEnd, "\n")
+
+			indexEndAct := 0
+			if indexEndActDot > indexEndActSlash {
+				indexEndAct = indexEndActSlash
+			} else {
+				indexEndAct = indexEndActDot
+			}
+
+			if indexEndAct != -1 {
+				actTitle = s.CompleteWorks[indexAct : indexAct+indexEndAct]
+			}
+		}
+
+		sceneTitle := "Scene title not found"
+		if indexScene != -1 {
+			searchSceneEnd := s.CompleteWorks[indexScene : indexScene+200]
+			indexEndSeachScene := strings.Index(searchSceneEnd, "\n")
+
+			if indexEndSeachScene != -1 {
+				sceneTitle = s.CompleteWorks[indexScene : indexScene+indexEndSeachScene]
+			}
+		}
+
+		work := Work{
+			Text:  s.CompleteWorks[initialCut:endCut],
+			Scene: sceneTitle,
+			Act:   actTitle,
+		}
+
+		results = append(results, work)
 	}
 	return results
 }
