@@ -11,10 +11,10 @@ class HomeCubit extends Cubit<HomeState> {
   final GetSearch getSearch;
   final HighlightText highlightText;
 
-  Future<void> onClick(String query) async {
+  Future<void> onClick(String query, {int page = 1}) async {
     emit(Loading());
 
-    await getSearch(query).then(
+    await getSearch(query, page: page).then(
       (value) => value.fold(
         (l) => emit(Error(message: l.message)),
         (r) => emit(
@@ -22,6 +22,9 @@ class HomeCubit extends Cubit<HomeState> {
             searchResult: Search(
               searchList:
                   r.searchList.map((e) => highlightPhrase(e, query)).toList(),
+              currentPage: r.currentPage,
+              totalItemsLength: r.totalItemsLength,
+              totalPagesLength: r.totalPagesLength,
             ),
           ),
         ),
@@ -32,4 +35,6 @@ class HomeCubit extends Cubit<HomeState> {
   String highlightPhrase(String phrase, String query) {
     return highlightText(phrase, query).fold((l) => '', (r) => r);
   }
+
+  void nextPage() {}
 }

@@ -8,7 +8,7 @@ class GetSearch {
 
   final SearchRepository searchRepository;
 
-  Future<Either<Error, Search>> call(String query) async {
+  Future<Either<Error, Search>> call(String query, {int page = 1}) async {
     if (query.length <= 3) {
       return Left(
         UseCaseError(
@@ -18,7 +18,7 @@ class GetSearch {
       );
     }
 
-    final result = await searchRepository.getFilteredItems(query);
+    final result = await searchRepository.getFilteredItems(query, page);
     return Right(result);
   }
 }

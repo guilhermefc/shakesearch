@@ -1,3 +1,3 @@
 abstract class Datasource {
-  Future<String> getSearch(String query);
+  Future<String> getSearch(String query, int page);
 }

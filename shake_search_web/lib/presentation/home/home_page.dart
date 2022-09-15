@@ -31,9 +31,19 @@ class HomeView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final _scrollController = ScrollController();
     final searchController = TextEditingController(text: '');
 
+    void _scrollUp() {
+      _scrollController.animateTo(
+        _scrollController.position.minScrollExtent,
+        duration: const Duration(seconds: 2),
+        curve: Curves.fastOutSlowIn,
+      );
+    }
+
     return SingleChildScrollView(
+      controller: _scrollController,
       physics: const ScrollPhysics(),
       child: Container(
         alignment: Alignment.topCenter,
@@ -52,16 +62,27 @@ class HomeView extends StatelessWidget {
                   } else if (state is Loading) {
                     return buildProgressBar();
                   } else if (state is Loaded) {
+                    _scrollUp();
                     return Column(
                       children: [
                         buildResultsFoundText(state),
                         const SizedBox(
                           height: 40,
                         ),
+                        buildPaginationButtons(
+                          state,
+                          context,
+                          searchController.text,
+                        ),
                         buildResultsListView(
                           state,
                           searchController,
                           context,
+                        ),
+                        buildPaginationButtons(
+                          state,
+                          context,
+                          searchController.text,
                         ),
                       ],
                     );
@@ -83,19 +104,24 @@ class HomeView extends StatelessWidget {
   ) {
     return Column(
       children: [
-        TextFormField(
-          controller: searchController,
-          textInputAction: TextInputAction.done,
-          onFieldSubmitted: (value) => submitSearch(context, searchController),
-          decoration: InputDecoration(
-            labelText: 'Search',
-            hintText: 'Search',
-            suffixIcon: IconButton(
-              onPressed: () {
-                submitSearch(context, searchController);
-              },
-              icon: const Icon(
-                Icons.search,
+        Semantics(
+          label: 'textfield search',
+          child: TextFormField(
+            controller: searchController,
+            textInputAction: TextInputAction.done,
+            onFieldSubmitted: (value) =>
+                submitSearch(context, searchController),
+            decoration: InputDecoration(
+              labelText: 'Search',
+              hintText: 'Search',
+              suffixIcon: IconButton(
+                tooltip: 'Search button',
+                onPressed: () {
+                  submitSearch(context, searchController);
+                },
+                icon: const Icon(
+                  Icons.search,
+                ),
               ),
             ),
           ),
@@ -117,7 +143,7 @@ class HomeView extends StatelessWidget {
             const SizedBox(
               width: 14,
             ),
-            const Text(
+            const SelectableText(
               'Shake Search',
               style: TextStyle(
                 fontSize: 26,
@@ -129,7 +155,7 @@ class HomeView extends StatelessWidget {
         const SizedBox(
           height: 8,
         ),
-        const Text(
+        const SelectableText(
           'Find great art pieces from Shakespere at a glance!\n',
           style: TextStyle(fontSize: 18),
           textAlign: TextAlign.center,
@@ -139,8 +165,8 @@ class HomeView extends StatelessWidget {
   }
 
   Widget buildResultsFoundText(Loaded state) {
-    return Text(
-      '${state.searchResult.searchList.length} results found;',
+    return SelectableText(
+      '${state.searchResult.totalItemsLength} results found;',
     );
   }
 
@@ -159,8 +185,8 @@ class HomeView extends StatelessWidget {
         return Card(
           child: Padding(
             padding: const EdgeInsets.all(16),
-            child: RichText(
-              text: highlightQueryWords(
+            child: SelectableText.rich(
+              highlightQueryWords(
                 phrase,
                 searchController.text,
               ),
@@ -207,6 +233,7 @@ class HomeView extends StatelessWidget {
       radius: 24,
       child: ClipOval(
         child: Image(
+          semanticLabel: 'image of shakespere face',
           image: AssetImage('assets/shake.png'),
         ),
       ),
@@ -214,4 +241,54 @@ class HomeView extends StatelessWidget {
   }
 
   Widget buildProgressBar() => const CircularProgressIndicator();
+
+  Widget buildPaginationButtons(
+    Loaded state,
+    BuildContext context,
+    String query,
+  ) {
+    if (state.searchResult.totalPagesLength == 1) return Container();
+
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Visibility(
+          visible: state.searchResult.currentPage > 1,
+          child: ElevatedButton(
+            onPressed: () {
+              final page = state.searchResult.currentPage - 1;
+              context.read<HomeCubit>().onClick(
+                    query,
+                    page: page,
+                  );
+            },
+            child: const Text('previous'),
+          ),
+        ),
+        Visibility(
+          visible: state.searchResult.totalPagesLength > 0,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 12),
+            child: Text(
+              '${state.searchResult.currentPage} of ${state.searchResult.totalPagesLength}',
+            ),
+          ),
+        ),
+        Visibility(
+          visible: state.searchResult.currentPage <
+              state.searchResult.totalPagesLength,
+          child: ElevatedButton(
+            onPressed: () {
+              final page = state.searchResult.currentPage + 1;
+              context.read<HomeCubit>().onClick(
+                    query,
+                    page: page,
+                  );
+            },
+            child: const Text('next'),
+          ),
+        ),
+      ],
+    );
+  }
 }

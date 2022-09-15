@@ -4,16 +4,16 @@ import 'package:shake_search/data/datasources/datasource.dart';
 
 class NetworkDatasource implements Datasource {
   @override
-  Future<String> getSearch(String query) async {
+  Future<String> getSearch(String query, int page) async {
     try {
       final options = BaseOptions(
-        baseUrl: 'https://shake-search-gui.herokuapp.com',
+        baseUrl: 'http://localhost:3001/',
       );
 
       final dio = Dio(options);
 
       final response = await dio.get<String>(
-        '/search?q=$query',
+        '/search?q=$query&page=$page',
         options: Options(method: 'GET'),
       );
 
