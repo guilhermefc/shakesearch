@@ -44,69 +44,63 @@ class HomeView extends StatelessWidget {
     }
 
     return SingleChildScrollView(
+      physics: const ScrollPhysics(),
       controller: _scrollController,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Container(
-            alignment: Alignment.topCenter,
-            padding: const EdgeInsets.all(16),
-            child: SizedBox(
-              width: 800,
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  buildHeader(),
-                  buildSearchField(searchController, context),
-                  BlocBuilder<HomeCubit, HomeState>(
-                    builder: (context, state) {
-                      if (state is Error) {
-                        return Text(state.message);
-                      } else if (state is Loading) {
-                        return buildProgressBar();
-                      } else if (state is Loaded) {
-                        _scrollUp();
-                        return Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            buildResultsFoundText(state),
-                            const SizedBox(
-                              height: 40,
-                            ),
-                            buildPaginationButtons(
-                              state,
-                              context,
-                              searchController.text,
-                            ),
-                            const SizedBox(
-                              height: 16,
-                            ),
-                            buildResultsListView(
-                              state,
-                              searchController,
-                              context,
-                            ),
-                            const SizedBox(
-                              height: 16,
-                            ),
-                            buildPaginationButtons(
-                              state,
-                              context,
-                              searchController.text,
-                            ),
-                          ],
-                        );
-                      } else {
-                        return Container();
-                      }
-                    },
-                  ),
-                ],
+      child: Container(
+        alignment: Alignment.topCenter,
+        padding: const EdgeInsets.all(16),
+        child: SizedBox(
+          width: 800,
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              buildHeader(),
+              buildSearchField(searchController, context),
+              BlocBuilder<HomeCubit, HomeState>(
+                builder: (context, state) {
+                  if (state is Error) {
+                    return Text(state.message);
+                  } else if (state is Loading) {
+                    return buildProgressBar();
+                  } else if (state is Loaded) {
+                    _scrollUp();
+                    return Column(
+                      children: [
+                        buildResultsFoundText(state),
+                        const SizedBox(
+                          height: 40,
+                        ),
+                        buildPaginationButtons(
+                          state,
+                          context,
+                          searchController.text,
+                        ),
+                        const SizedBox(
+                          height: 16,
+                        ),
+                        buildResultsListView(
+                          state,
+                          searchController,
+                          context,
+                        ),
+                        const SizedBox(
+                          height: 16,
+                        ),
+                        buildPaginationButtons(
+                          state,
+                          context,
+                          searchController.text,
+                        ),
+                      ],
+                    );
+                  } else {
+                    return Container();
+                  }
+                },
               ),
-            ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }
@@ -116,7 +110,6 @@ class HomeView extends StatelessWidget {
     BuildContext context,
   ) {
     return Column(
-      mainAxisSize: MainAxisSize.min,
       children: [
         Semantics(
           label: 'textfield search',
@@ -189,62 +182,61 @@ class HomeView extends StatelessWidget {
     TextEditingController searchController,
     BuildContext context,
   ) {
-    return Flexible(
-      child: ListView.builder(
-        shrinkWrap: true,
-        itemCount: state.searchResult.searchList.length,
-        itemBuilder: (context, index) {
-          final phrase = state.searchResult.searchList[index];
-          final textHighlighted = highlightQueryWords(
-            phrase.text,
-            searchController.text,
-          );
+    return ListView.builder(
+      physics: const NeverScrollableScrollPhysics(),
+      shrinkWrap: true,
+      itemCount: state.searchResult.searchList.length,
+      itemBuilder: (context, index) {
+        final phrase = state.searchResult.searchList[index];
+        final textHighlighted = highlightQueryWords(
+          phrase.text,
+          searchController.text,
+        );
 
-          final textHighlightedExtended = highlightQueryWords(
-            phrase.textExtended,
-            searchController.text,
-          );
+        final textHighlightedExtended = highlightQueryWords(
+          phrase.textExtended,
+          searchController.text,
+        );
 
-          final cardTitle = '${phrase.actName} ${phrase.sceneName}';
+        final cardTitle = '${phrase.actName} ${phrase.sceneName}';
 
-          return Card(
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: ExpandablePanel(
-                header: Center(
-                  child: Text(
-                    cardTitle,
-                    style: const TextStyle(
-                      fontWeight: FontWeight.bold,
-                    ),
+        return Card(
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: ExpandablePanel(
+              header: Center(
+                child: Text(
+                  cardTitle,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
                   ),
                 ),
-                collapsed: Text.rich(
-                  textHighlighted,
-                  softWrap: true,
-                  overflow: TextOverflow.visible,
-                  maxLines: 2,
-                ),
-                expanded: Text.rich(
-                  textHighlightedExtended,
-                ),
-
-                theme: const ExpandableThemeData(
-                  animationDuration: Duration(milliseconds: 300),
-                ),
-
-                // hasIcon: true,
               ),
-            ),
-          );
+              collapsed: Text.rich(
+                textHighlighted,
+                softWrap: true,
+                overflow: TextOverflow.visible,
+                maxLines: 2,
+              ),
+              expanded: Text.rich(
+                textHighlightedExtended,
+              ),
 
-          // return ExpandableCard(
-          //   cardTitle: cardTitle,
-          //   text: textHighlighted,
-          //   textExtended: textHighlightedExtended,
-          // );
-        },
-      ),
+              theme: const ExpandableThemeData(
+                animationDuration: Duration(milliseconds: 300),
+              ),
+
+              // hasIcon: true,
+            ),
+          ),
+        );
+
+        // return ExpandableCard(
+        //   cardTitle: cardTitle,
+        //   text: textHighlighted,
+        //   textExtended: textHighlightedExtended,
+        // );
+      },
     );
   }
 
