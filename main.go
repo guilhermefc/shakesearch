@@ -54,9 +54,10 @@ type Response struct {
 }
 
 type Work struct {
-	Text  string
-	Scene string
-	Act   string
+	Text         string
+	TextExtended string
+	Scene        string
+	Act          string
 }
 
 func handleSearch(searcher Searcher) func(w http.ResponseWriter, r *http.Request) {
@@ -138,6 +139,16 @@ func (s *Searcher) Search(query string) []Work {
 			endCut = len(s.CompleteWorks) - 1
 		}
 
+		extendedTextinitialCut := idx - 1000
+		if extendedTextinitialCut < 0 {
+			extendedTextinitialCut = 0
+		}
+
+		extendedTextendCut := idx + 1000
+		if extendedTextendCut > len(s.CompleteWorks) {
+			extendedTextendCut = len(s.CompleteWorks) - 1
+		}
+
 		searchScene := s.CompleteWorks[0:idx]
 		indexAct := strings.LastIndex(searchScene, "ACT")
 		indexScene := strings.LastIndex(searchScene, "SCENE")
@@ -171,9 +182,10 @@ func (s *Searcher) Search(query string) []Work {
 		}
 
 		work := Work{
-			Text:  s.CompleteWorks[initialCut:endCut],
-			Scene: sceneTitle,
-			Act:   actTitle,
+			Text:         s.CompleteWorks[initialCut:endCut],
+			TextExtended: s.CompleteWorks[extendedTextinitialCut:extendedTextendCut],
+			Scene:        sceneTitle,
+			Act:          actTitle,
 		}
 
 		results = append(results, work)
