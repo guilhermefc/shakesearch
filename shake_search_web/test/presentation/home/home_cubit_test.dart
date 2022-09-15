@@ -22,11 +22,12 @@ void main() {
 
   test('It should emit a complete list on search', () async {
     when(() => getSearch('query')).thenAnswer(
-        (_) => Future.value(const Right(Search(searchList: ['lorem ipsum']))));
+      (_) => Future.value(const Right(Search(searchList: ['lorem ipsum']))),
+    );
     when(() => highlightText('lorem ipsum', 'query'))
         .thenAnswer((_) => const Right(''));
 
-    await homeCubit.onClick('query');
+    await homeCubit.onSearch('query');
 
     await expectLater(
       homeCubit.stream,
