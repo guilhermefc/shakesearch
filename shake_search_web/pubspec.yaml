@@ -15,6 +15,7 @@ dependencies:
   dartz: ^0.10.1
   dio: ^4.0.6
   equatable: ^2.0.5
+  expandable: ^5.0.1
   faker: ^2.0.0
   flutter:
     sdk: flutter
