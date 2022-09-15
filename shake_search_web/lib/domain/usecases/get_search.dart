@@ -8,7 +8,7 @@ class GetSearch {
 
   final SearchRepository searchRepository;
 
-  Future<Either<Error, Search>> call(String query, {int page = 1}) async {
+  Future<Either<Error, Search>> call(String query, {int page = 0}) async {
     if (query.length <= 3) {
       return Left(
         UseCaseError(

@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:shake_search/data/models/scene_item_data.dart';
 import 'package:shake_search/domain/entities/search.dart';
 // ignore_for_file: implicit_dynamic_parameter
 
@@ -12,8 +13,11 @@ class SearchData extends Search {
 
   factory SearchData.fromMap(Map<String, dynamic> map) {
     return SearchData(
-      searchList:
-          (map['Items'] as List<dynamic>).map((e) => e as String).toList(),
+      searchList: List<SceneItemData>.from(
+        (map['Items'] as List).map<SceneItemData>(
+          (e) => SceneItemData.fromMap(e as Map<String, dynamic>),
+        ),
+      ),
       totalPagesLength: map['TotalPagesLength'] as int,
       totalItemsLength: map['TotalItemsLength'] as int,
       currentPage: map['CurrentPage'] as int,

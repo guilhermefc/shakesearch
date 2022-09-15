@@ -1,4 +1,5 @@
 import 'package:bloc/bloc.dart';
+import 'package:shake_search/domain/entities/scene_item.dart';
 import 'package:shake_search/domain/entities/search.dart';
 import 'package:shake_search/domain/usecases/get_search.dart';
 import 'package:shake_search/domain/usecases/highlight_text.dart';
@@ -11,7 +12,7 @@ class HomeCubit extends Cubit<HomeState> {
   final GetSearch getSearch;
   final HighlightText highlightText;
 
-  Future<void> onClick(String query, {int page = 1}) async {
+  Future<void> onSearch(String query, {int page = 0}) async {
     emit(Loading());
 
     await getSearch(query, page: page).then(
@@ -20,8 +21,15 @@ class HomeCubit extends Cubit<HomeState> {
         (r) => emit(
           Loaded(
             searchResult: Search(
-              searchList:
-                  r.searchList.map((e) => highlightPhrase(e, query)).toList(),
+              searchList: List<SceneItem>.from(
+                r.searchList.map<SceneItem>(
+                  (e) => SceneItem(
+                    text: highlightPhrase(e.text, query),
+                    sceneName: e.sceneName,
+                    actName: e.actName,
+                  ),
+                ),
+              ),
               currentPage: r.currentPage,
               totalItemsLength: r.totalItemsLength,
               totalPagesLength: r.totalPagesLength,
@@ -35,6 +43,4 @@ class HomeCubit extends Cubit<HomeState> {
   String highlightPhrase(String phrase, String query) {
     return highlightText(phrase, query).fold((l) => '', (r) => r);
   }
-
-  void nextPage() {}
 }

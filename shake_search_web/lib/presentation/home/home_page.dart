@@ -185,11 +185,19 @@ class HomeView extends StatelessWidget {
         return Card(
           child: Padding(
             padding: const EdgeInsets.all(16),
-            child: SelectableText.rich(
-              highlightQueryWords(
-                phrase,
-                searchController.text,
-              ),
+            child: Column(
+              children: [
+                SelectableText(
+                  '${phrase.actName} ${phrase.sceneName}',
+                  style: const TextStyle(fontWeight: FontWeight.bold),
+                ),
+                SelectableText.rich(
+                  highlightQueryWords(
+                    phrase.text,
+                    searchController.text,
+                  ),
+                ),
+              ],
             ),
           ),
         );
@@ -224,7 +232,7 @@ class HomeView extends StatelessWidget {
     BuildContext context,
     TextEditingController searchController,
   ) {
-    context.read<HomeCubit>().onClick(searchController.text);
+    context.read<HomeCubit>().onSearch(searchController.text);
   }
 
   Widget buildShakeSearchAvatar() {
@@ -247,17 +255,15 @@ class HomeView extends StatelessWidget {
     BuildContext context,
     String query,
   ) {
-    if (state.searchResult.totalPagesLength == 1) return Container();
-
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         Visibility(
-          visible: state.searchResult.currentPage > 1,
+          visible: state.searchResult.currentPage > 0,
           child: ElevatedButton(
             onPressed: () {
               final page = state.searchResult.currentPage - 1;
-              context.read<HomeCubit>().onClick(
+              context.read<HomeCubit>().onSearch(
                     query,
                     page: page,
                   );
@@ -270,17 +276,17 @@ class HomeView extends StatelessWidget {
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 12),
             child: Text(
-              '${state.searchResult.currentPage} of ${state.searchResult.totalPagesLength}',
+              '${state.searchResult.currentPage + 1} of ${state.searchResult.totalPagesLength}',
             ),
           ),
         ),
         Visibility(
-          visible: state.searchResult.currentPage <
+          visible: state.searchResult.currentPage + 1 <
               state.searchResult.totalPagesLength,
           child: ElevatedButton(
             onPressed: () {
               final page = state.searchResult.currentPage + 1;
-              context.read<HomeCubit>().onClick(
+              context.read<HomeCubit>().onSearch(
                     query,
                     page: page,
                   );
