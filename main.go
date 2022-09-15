@@ -129,12 +129,12 @@ func (s *Searcher) Search(query string) []Work {
 
 	results := []Work{}
 	for _, idx := range idxs {
-		initialCut := idx - 250
+		initialCut := idx
 		if initialCut < 0 {
 			initialCut = 0
 		}
 
-		endCut := idx + 250
+		endCut := idx + 50
 		if endCut > len(s.CompleteWorks) {
 			endCut = len(s.CompleteWorks) - 1
 		}
@@ -153,7 +153,7 @@ func (s *Searcher) Search(query string) []Work {
 		indexAct := strings.LastIndex(searchScene, "ACT")
 		indexScene := strings.LastIndex(searchScene, "SCENE")
 
-		actTitle := "Act not found"
+		actTitle := ""
 		if indexAct != -1 {
 			searchActEnd := s.CompleteWorks[indexAct : indexAct+200]
 			indexEndActDot := strings.Index(searchActEnd, ".")
@@ -171,7 +171,7 @@ func (s *Searcher) Search(query string) []Work {
 			}
 		}
 
-		sceneTitle := "Scene title not found"
+		sceneTitle := ""
 		if indexScene != -1 {
 			searchSceneEnd := s.CompleteWorks[indexScene : indexScene+200]
 			indexEndSeachScene := strings.Index(searchSceneEnd, "\n")
